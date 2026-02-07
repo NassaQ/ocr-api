@@ -11,9 +11,6 @@ import re
 from datetime import datetime
 import logging
 
-# ==============================================================================
-# 1. Configuration & Initialization
-# ==============================================================================
 
 app = FastAPI(
     title="Intelligent Document Processing Pipeline", 
