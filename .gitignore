@@ -23,4 +23,4 @@ uv.lock
 *.swo
 
 # Processed Docs Directory
-processed_documents/
+documents/

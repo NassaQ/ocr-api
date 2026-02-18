@@ -6,7 +6,7 @@ import fitz
 import json
 import os
 
-from app.core.config import OUTPUT_DIR
+from app.core.config import settings
 from app.core.logging import logger
 from app.api.deps import (
     get_paddle_engine,
@@ -57,7 +57,7 @@ async def process_documents(request: Request, files: List[UploadFile] = File(...
 
         try:
             original_save_name = f"{batch_id}_SOURCE_{safe_filename}"
-            original_file_path = os.path.join(OUTPUT_DIR, original_save_name)
+            original_file_path = os.path.join(settings.OUTPUT_DIR, original_save_name)
             with open(original_file_path, "wb") as f:
                 f.write(file_content)
             file_metadata["source_file_path"] = original_file_path
@@ -158,7 +158,7 @@ async def process_documents(request: Request, files: List[UploadFile] = File(...
                 raise HTTPException(status_code=400, detail="Unsupported file type")
 
             text_filename = f"{batch_id}_TARGET_{safe_filename}.txt"
-            text_file_path = os.path.join(OUTPUT_DIR, text_filename)
+            text_file_path = os.path.join(settings.OUTPUT_DIR, text_filename)
             with open(text_file_path, "w", encoding="utf-8") as f:
                 f.write(extracted_full_text)
 
@@ -172,7 +172,7 @@ async def process_documents(request: Request, files: List[UploadFile] = File(...
             batch_metadata.append(file_metadata)
 
     details_filename = f"Batch_Details_{batch_id}.json"
-    details_path = os.path.join(OUTPUT_DIR, details_filename)
+    details_path = os.path.join(settings.OUTPUT_DIR, details_filename)
     with open(details_path, "w", encoding="utf-8") as f:
         json.dump(batch_metadata, f, ensure_ascii=False, indent=4)
 
@@ -180,5 +180,5 @@ async def process_documents(request: Request, files: List[UploadFile] = File(...
         "status": "batch_complete",
         "batch_id": batch_id,
         "processed_files_count": len(files),
-        "output_directory": OUTPUT_DIR,
+        "output_directory": settings.OUTPUT_DIR,
     }
