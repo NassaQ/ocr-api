@@ -14,7 +14,7 @@ from app.services.worker import create_message_handler
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Handles startup (OCR engine loading) and shutdown events."""
-    
+
     logger.info("Loading PaddleOCR engine...")
     app.state.paddle_engine = PaddleOCR(use_angle_cls=False, lang="ar")
 
@@ -22,7 +22,7 @@ async def lifespan(app: FastAPI):
     app.state.easy_engine = easyocr.Reader(["ar", "en"], gpu=settings.GPU)
 
     logger.info("All AI models ready")
-    
+
     logger.info("Connecting to message broker...")
     broker = RabbitMQBroker(settings.MESSAGE_BROKER_URL)
     await broker.connect()
@@ -61,3 +61,9 @@ app = FastAPI(
 )
 
 app.include_router(api_router, prefix="/api")
+
+
+@app.get("/", status_code=204)
+async def health():
+    """Health check endpoint for Docker."""
+    return
