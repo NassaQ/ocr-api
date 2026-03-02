@@ -8,6 +8,7 @@ dependencies = [
     "aio-pika>=9.6.1",
     "aiohttp>=3.13.3",
     "aioodbc>=0.5.0",
+    "azure-servicebus>=7.14.3",
     "azure-storage-blob>=12.28.0",
     "easyocr==1.7.2",
     "fastapi==0.124.4",

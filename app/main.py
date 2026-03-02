@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from paddleocr import PaddleOCR
 import easyocr
 
-from app.core.broker import RabbitMQBroker
+from app.api.deps import get_broker
 from app.core.config import settings
 from app.core.logging import logger
 from app.api.endpoints.api import api_router
@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     logger.info("All AI models ready")
 
     logger.info("Connecting to message broker...")
-    broker = RabbitMQBroker(settings.MESSAGE_BROKER_URL)
+    broker = get_broker()
     await broker.connect()
     app.state.broker = broker
     logger.info("Message broker connected")

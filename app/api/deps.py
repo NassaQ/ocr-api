@@ -4,7 +4,18 @@ from datetime import datetime
 import numpy as np
 import re
 
+from app.core.broker import AzureServiceBusBroker, BaseBroker, RabbitMQBroker
 from app.core.logging import logger
+from app.core.config import settings
+
+def get_broker() -> BaseBroker:
+    if settings.ENVIRONMENT == "production":
+        return AzureServiceBusBroker(settings.MESSAGE_BROKER_URL)
+    else:
+        return RabbitMQBroker(settings.MESSAGE_BROKER_URL)
+
+def get_event_broker(request: Request) -> BaseBroker:
+    return request.app.state.broker
 
 
 def get_paddle_engine(request: Request):

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Callable, Awaitable
 import json
 import aio_pika
-
+from azure.servicebus import ServiceBusClient, ServiceBusMessage
 
 class BaseBroker(ABC):
     @abstractmethod
@@ -73,3 +73,45 @@ class RabbitMQBroker(BaseBroker):
     async def close(self):
         if self.connection:
             await self.connection.close()
+
+class AzureServiceBusBroker(BaseBroker):
+    def __init__(self, conn_str: str):
+        self.conn_str = conn_str
+        self.client = None
+
+    async def connect(self):
+        self.client = ServiceBusClient.from_connection_string(self.conn_str)
+
+    async def publish(self, queue_name: str, message: dict):
+        if not self.client:
+            raise RuntimeError("Azure Service Bus client is not connected")
+
+        sender = self.client.get_queue_sender(queue_name=queue_name)
+        async with sender:
+            payload = json.dumps(message)
+            await sender.send_messages(
+                ServiceBusMessage(payload, content_type="application/json")
+            )
+
+    async def consume(
+        self, queue_name: str, callback: Callable[[dict], Awaitable[None]]
+    ):
+        if not self.client:
+            raise RuntimeError("Azure Service Bus client is not connected")
+
+        receiver = self.client.get_queue_receiver(queue_name=queue_name)
+        async with receiver:
+            async for message in receiver:
+                try:
+                    body = b"".join(bytes(chunk) for chunk in message.body).decode()
+                    await callback(json.loads(body))
+                except Exception:
+                    await receiver.abandon_message(message)
+                    raise
+                else:
+                    await receiver.complete_message(message)
+
+    async def close(self):
+        if self.client:
+            await self.client.close()
+            self.client = None

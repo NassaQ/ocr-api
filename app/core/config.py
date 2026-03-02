@@ -4,6 +4,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    ENVIRONMENT: str
+    
     # --- OCR ---
     OUTPUT_DIR: str = "documents"
     GPU: bool = False
